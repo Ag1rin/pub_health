@@ -6,8 +6,7 @@ import '../models/pub_health_options.dart';
 /// Shared context passed to every rule.
 class RuleContext {
   /// Creates a rule evaluation context.
-  const RuleContext({ // ignore: prefer_const_constructors_in_immutables
-
+  const RuleContext({
     required this.projectPath,
     required this.dependencies,
     required this.packageInfo,

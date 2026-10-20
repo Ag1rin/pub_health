@@ -8,18 +8,18 @@ import 'package:test/test.dart';
 void main() {
   test('flags unused direct dependencies', () {
     final findings = const UnusedDependencyRule().evaluate(
-      RuleContext(
+      const RuleContext(
         projectPath: '.',
-        dependencies: const [
+        dependencies: [
           Dependency(
             name: 'unused_pkg',
             kind: DependencyKind.direct,
             lockedVersion: '1.0.0',
           ),
         ],
-        packageInfo: const {},
-        unusedPackages: const {'unused_pkg'},
-        options: const PubHealthOptions(),
+        packageInfo: {},
+        unusedPackages: {'unused_pkg'},
+        options: PubHealthOptions(),
       ),
     );
     expect(findings.single.ruleId, 'unused_dependency');
@@ -27,18 +27,18 @@ void main() {
 
   test('respects exclude list', () {
     final findings = const UnusedDependencyRule().evaluate(
-      RuleContext(
+      const RuleContext(
         projectPath: '.',
-        dependencies: const [
+        dependencies: [
           Dependency(
             name: 'unused_pkg',
             kind: DependencyKind.direct,
             lockedVersion: '1.0.0',
           ),
         ],
-        packageInfo: const {},
-        unusedPackages: const {'unused_pkg'},
-        options: const PubHealthOptions(exclude: {'unused_pkg'}),
+        packageInfo: {},
+        unusedPackages: {'unused_pkg'},
+        options: PubHealthOptions(exclude: {'unused_pkg'}),
       ),
     );
     expect(findings, isEmpty);

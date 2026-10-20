@@ -9,7 +9,7 @@ import '../support/mock_pub_dev_client.dart';
 
 void main() {
   test('flags outdated locked versions', () {
-    final rule = const OutdatedRule();
+    const rule = OutdatedRule();
     final findings = rule.evaluate(
       RuleContext(
         projectPath: '.',
@@ -33,7 +33,7 @@ void main() {
   });
 
   test('ignores up-to-date packages', () {
-    final rule = const OutdatedRule();
+    const rule = OutdatedRule();
     final findings = rule.evaluate(
       RuleContext(
         projectPath: '.',
