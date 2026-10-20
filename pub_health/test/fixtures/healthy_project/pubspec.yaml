@@ -1,0 +1,13 @@
+name: healthy_project
+description: Fixture project with healthy dependencies.
+version: 1.0.0
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  path: ^1.9.0
+  collection: ^1.18.0
+
+dev_dependencies:
+  test: ^1.25.0

@@ -1,0 +1,18 @@
+name: risky_project
+description: Fixture project with risky dependencies.
+version: 1.0.0
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  outdated_pkg: ^1.0.0
+  discontinued_pkg: ^1.0.0
+  retracted_pkg: ^1.0.0
+  stale_pkg: ^1.0.0
+  unused_pkg: ^1.0.0
+  low_score_pkg: ^1.0.0
+  sdk_risk_pkg: ^1.0.0
+
+dev_dependencies:
+  test: ^1.25.0
