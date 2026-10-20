@@ -1,12 +1,17 @@
 import 'package:pub_health/pub_health.dart';
 import 'package:test/test.dart';
 
+import '../support/fixture_projects.dart';
 import '../support/mock_pub_dev_client.dart';
 
 void main() {
   test('analyzeProject returns a full report for risky fixture', () async {
+    const fixture = 'test/fixtures/risky_project';
+    await materializeRiskySources(fixture);
+    addTearDown(() => cleanupRiskySources(fixture));
+
     final report = await analyzeProject(
-      'test/fixtures/risky_project',
+      fixture,
       options: PubHealthOptions(
         now: DateTime.utc(2026, 10, 20),
         color: false,

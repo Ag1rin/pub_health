@@ -8,6 +8,7 @@ import 'package:pub_health/src/cli/exit_codes.dart';
 import 'package:pub_health/src/models/pub_health_options.dart';
 import 'package:test/test.dart';
 
+import '../support/fixture_projects.dart';
 import '../support/mock_pub_dev_client.dart';
 
 class _MemorySink implements IOSink {
@@ -109,10 +110,14 @@ void main() {
   });
 
   test('analyzes risky fixture and fails on high findings', () async {
+    const fixture = 'test/fixtures/risky_project';
+    await materializeRiskySources(fixture);
+    addTearDown(() => cleanupRiskySources(fixture));
+
     final runner = runnerFor(const PubHealthOptions());
     final code = await runner.run([
       '--path',
-      'test/fixtures/risky_project',
+      fixture,
       '--format',
       'json',
       '--fail-on',
@@ -139,13 +144,17 @@ void main() {
   });
 
   test('writes report to output file', () async {
+    const fixture = 'test/fixtures/risky_project';
+    await materializeRiskySources(fixture);
+    addTearDown(() => cleanupRiskySources(fixture));
+
     final temp = await Directory.systemTemp.createTemp('pub_health_out_');
     addTearDown(() => temp.delete(recursive: true));
     final output = p.join(temp.path, 'report.md');
     final runner = runnerFor(const PubHealthOptions());
     final code = await runner.run([
       '--path',
-      'test/fixtures/risky_project',
+      fixture,
       '--format',
       'markdown',
       '--output',

@@ -3,17 +3,23 @@ import 'package:pub_health/src/models/dependency.dart';
 import 'package:pub_health/src/models/dependency_kind.dart';
 import 'package:test/test.dart';
 
+import '../support/fixture_projects.dart';
+
 void main() {
   final analyzer = UnusedDependencyAnalyzer();
 
   test('detects unused direct dependency in risky fixture', () async {
+    const fixture = 'test/fixtures/risky_project';
+    await materializeRiskySources(fixture);
+    addTearDown(() => cleanupRiskySources(fixture));
+
     final deps = [
       const Dependency(name: 'outdated_pkg', kind: DependencyKind.direct),
       const Dependency(name: 'unused_pkg', kind: DependencyKind.direct),
       const Dependency(name: 'test', kind: DependencyKind.dev),
     ];
     final unused = await analyzer.findUnused(
-      projectPath: 'test/fixtures/risky_project',
+      projectPath: fixture,
       dependencies: deps,
     );
     expect(unused, contains('unused_pkg'));
