@@ -5,6 +5,8 @@ import 'package:path/path.dart' as p;
 import 'package:pub_health/src/analyzers/project_analyzer.dart';
 import 'package:pub_health/src/cli/command_runner.dart';
 import 'package:pub_health/src/cli/exit_codes.dart';
+import 'package:pub_health/src/clients/pub_dev_client.dart';
+import 'package:pub_health/src/models/dependency_report.dart';
 import 'package:pub_health/src/models/pub_health_options.dart';
 import 'package:test/test.dart';
 
@@ -189,4 +191,28 @@ void main() {
     final json = jsonDecode(out.buffer.toString()) as Map<String, dynamic>;
     expect(json['score'], greaterThanOrEqualTo(90));
   });
+
+  test('network failures return exit code 3', () async {
+    final runner = PubHealthCommandRunner(
+      stdoutSink: out,
+      stderrSink: err,
+      stdinHasTerminal: () => false,
+      analyzerFactory: (_) => _ThrowingNetworkAnalyzer(),
+    );
+    final code = await runner.run([
+      '--path',
+      'test/fixtures/healthy_project',
+    ]);
+    expect(code, ExitCodes.networkFailure);
+    expect(err.buffer.toString(), contains('network'));
+  });
+}
+
+class _ThrowingNetworkAnalyzer extends ProjectAnalyzer {
+  _ThrowingNetworkAnalyzer() : super();
+
+  @override
+  Future<DependencyReport> analyze(String projectPath) {
+    throw PubDevClientException('simulated network failure', timedOut: true);
+  }
 }
