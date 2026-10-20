@@ -3,7 +3,6 @@
 [![pub package](https://img.shields.io/pub/v/pub_health.svg)](https://pub.dev/packages/pub_health)
 [![likes](https://img.shields.io/pub/likes/pub_health)](https://pub.dev/packages/pub_health/score)
 [![pub points](https://img.shields.io/pub/points/pub_health)](https://pub.dev/packages/pub_health/score)
-[![popularity](https://img.shields.io/pub/popularity/pub_health)](https://pub.dev/packages/pub_health/score)
 [![CI](https://github.com/Ag1rin/pub_health/actions/workflows/ci.yml/badge.svg)](https://github.com/Ag1rin/pub_health/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
