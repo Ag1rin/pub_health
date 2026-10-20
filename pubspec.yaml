@@ -4,9 +4,9 @@ description: >-
   Detect outdated, discontinued, retracted, stale, and unused
   dependencies, then generate terminal, JSON, or Markdown reports.
 version: 0.1.0
-repository: https://github.com/YOUR_USERNAME/pub_health
-issue_tracker: https://github.com/YOUR_USERNAME/pub_health/issues
-homepage: https://github.com/YOUR_USERNAME/pub_health
+repository: https://github.com/Ag1rin/pub_health
+issue_tracker: https://github.com/Ag1rin/pub_health/issues
+homepage: https://github.com/Ag1rin/pub_health
 documentation: https://pub.dev/documentation/pub_health/latest/
 topics:
   - cli

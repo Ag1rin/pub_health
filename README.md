@@ -3,7 +3,7 @@
 [![pub package](https://img.shields.io/pub/v/pub_health.svg)](https://pub.dev/packages/pub_health)
 [![Dart SDK](https://img.shields.io/badge/Dart-3.5%2B-blue.svg)](https://dart.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/YOUR_USERNAME/pub_health/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/pub_health/actions)
+[![CI](https://github.com/Ag1rin/pub_health/actions/workflows/ci.yml/badge.svg)](https://github.com/Ag1rin/pub_health/actions)
 
 `pub_health` audits the dependency health of Dart and Flutter projects.
 
