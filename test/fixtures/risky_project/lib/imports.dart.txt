@@ -6,12 +6,3 @@ import 'package:low_score_pkg/low_score_pkg.dart';
 import 'package:sdk_risk_pkg/sdk_risk_pkg.dart';
 
 // unused_pkg is intentionally not imported.
-
-void main() {
-  outdated();
-  discontinued();
-  retracted();
-  stale();
-  lowScore();
-  sdkRisk();
-}

@@ -5,9 +5,8 @@
 build/
 doc/api/
 
-# Avoid committing pubspec.lock for library packages; see
-# https://dart.dev/guides/libraries/private-files#pubspeclock.
-pubspec.lock
+# Avoid committing the package lockfile; keep fixture locks.
+/pubspec.lock
 
 # IDE
 .idea/

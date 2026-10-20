@@ -1,0 +1,36 @@
+# Generated fixture lockfile for tests.
+packages:
+  collection:
+    dependency: "direct main"
+    description:
+      name: collection
+      sha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.19.0"
+  path:
+    dependency: "direct main"
+    description:
+      name: path
+      sha256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.9.0"
+  test:
+    dependency: "direct dev"
+    description:
+      name: test
+      sha256: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.25.8"
+  matcher:
+    dependency: transitive
+    description:
+      name: matcher
+      sha256: "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.12.16"
+sdks:
+  dart: ">=3.5.0 <4.0.0"

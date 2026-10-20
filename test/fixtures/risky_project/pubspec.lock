@@ -1,0 +1,76 @@
+# Generated fixture lockfile for tests.
+packages:
+  outdated_pkg:
+    dependency: "direct main"
+    description:
+      name: outdated_pkg
+      sha256: "1111111111111111111111111111111111111111111111111111111111111111"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  discontinued_pkg:
+    dependency: "direct main"
+    description:
+      name: discontinued_pkg
+      sha256: "2222222222222222222222222222222222222222222222222222222222222222"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  retracted_pkg:
+    dependency: "direct main"
+    description:
+      name: retracted_pkg
+      sha256: "3333333333333333333333333333333333333333333333333333333333333333"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  stale_pkg:
+    dependency: "direct main"
+    description:
+      name: stale_pkg
+      sha256: "4444444444444444444444444444444444444444444444444444444444444444"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  unused_pkg:
+    dependency: "direct main"
+    description:
+      name: unused_pkg
+      sha256: "5555555555555555555555555555555555555555555555555555555555555555"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  low_score_pkg:
+    dependency: "direct main"
+    description:
+      name: low_score_pkg
+      sha256: "6666666666666666666666666666666666666666666666666666666666666666"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  sdk_risk_pkg:
+    dependency: "direct main"
+    description:
+      name: sdk_risk_pkg
+      sha256: "7777777777777777777777777777777777777777777777777777777777777777"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  test:
+    dependency: "direct dev"
+    description:
+      name: test
+      sha256: "8888888888888888888888888888888888888888888888888888888888888888"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.25.8"
+  transitive_helper:
+    dependency: transitive
+    description:
+      name: transitive_helper
+      sha256: "9999999999999999999999999999999999999999999999999999999999999999"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
+sdks:
+  dart: ">=3.5.0 <4.0.0"
