@@ -1,3 +1,26 @@
-## 1.0.0
+# Changelog
 
-- Initial version.
+All notable changes to this project will be documented in this file.
+
+The format is based on Keep a Changelog,
+and this project adheres to Semantic Versioning.
+
+## 0.1.0
+
+### Added
+
+- Initial release.
+- Dart and Flutter dependency health analysis.
+- pubspec.yaml and pubspec.lock parsing.
+- pub.dev package metadata lookup.
+- Outdated dependency detection.
+- Discontinued package detection.
+- Retracted version detection.
+- Stale package detection.
+- SDK constraint risk detection.
+- Low package score detection.
+- Unused direct dependency detection.
+- Dependency health score.
+- Console, JSON, and Markdown reports.
+- CI-friendly exit codes.
+- Optional pub_health.yaml configuration.
