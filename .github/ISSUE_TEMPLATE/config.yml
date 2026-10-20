@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: pub.dev package page
+    url: https://pub.dev/packages/pub_health
+    about: Scores, versions, and API docs for pub_health
+  - name: Automated publishing docs
+    url: https://dart.dev/tools/pub/automated-publishing
+    about: Official Dart Trusted Publishing (OIDC) guide

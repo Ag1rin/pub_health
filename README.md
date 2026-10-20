@@ -1,93 +1,72 @@
 # pub_health
 
 [![pub package](https://img.shields.io/pub/v/pub_health.svg)](https://pub.dev/packages/pub_health)
-[![Dart SDK](https://img.shields.io/badge/Dart-3.5%2B-blue.svg)](https://dart.dev)
+[![likes](https://img.shields.io/pub/likes/pub_health)](https://pub.dev/packages/pub_health/score)
+[![pub points](https://img.shields.io/pub/points/pub_health)](https://pub.dev/packages/pub_health/score)
+[![popularity](https://img.shields.io/pub/popularity/pub_health)](https://pub.dev/packages/pub_health/score)
+[![CI](https://github.com/Ag1rin/pub_health/actions/workflows/ci.yml/badge.svg)](https://github.com/Ag1rin/pub_health/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/Ag1rin/pub_health/actions/workflows/ci.yml/badge.svg)](https://github.com/Ag1rin/pub_health/actions)
 
-`pub_health` audits the dependency health of Dart and Flutter projects.
+**Dependency health audits for Dart and Flutter projects.**
 
-It scans your `pubspec.yaml` and `pubspec.lock`, checks dependencies
-against pub.dev metadata, and reports outdated, discontinued, retracted,
-stale, low-quality, and unused packages.
+`pub_health` scans `pubspec.yaml` and `pubspec.lock`, checks packages against
+pub.dev, and produces a prioritized, CI-friendly report — without changing your
+project files.
 
-Unlike `dart pub outdated`, `pub_health` gives you a prioritized,
-CI-friendly dependency health report.
+> Complements `dart pub outdated` with discontinued, retracted, stale,
+> unused, and SDK-risk findings plus an overall health score.
 
-## Features
-
-- Detect outdated dependencies.
-- Detect discontinued packages.
-- Detect retracted package versions.
-- Detect stale packages.
-- Detect Dart SDK compatibility risks.
-- Detect unused direct dependencies.
-- Calculate an overall dependency health score.
-- Generate console, JSON, and Markdown reports.
-- Work in CI with meaningful exit codes.
-- Read-only by default: it never changes your project automatically.
-
-## Installation
-
-Activate globally:
+## Quick start
 
 ```bash
 dart pub global activate pub_health
-```
-
-Then run:
-
-```bash
 pub_health
 ```
 
-You can also add it as a dev dependency:
+Or as a dev dependency:
 
 ```bash
 dart pub add --dev pub_health
-```
-
-Then run:
-
-```bash
 dart run pub_health
 ```
 
+## Why pub_health?
+
+| Question | Tool |
+|---|---|
+| Are newer versions available? | `dart pub outdated` |
+| Which deps are risky, stale, unused, or discontinued? | **`pub_health`** |
+| What should CI fail on? | **`pub_health --fail-on high`** |
+
+## Features
+
+- Detect outdated, discontinued, retracted, and stale packages
+- Flag Dart SDK compatibility risks and low pub scores
+- Find unused direct dependencies
+- Score overall dependency health (0–100)
+- Report as console, JSON, or Markdown
+- Fail CI with meaningful exit codes
+- Read-only by default — never mutates your project
+
 ## Usage
 
-Run in the current project:
-
 ```bash
+# Current directory
 pub_health
-```
 
-Specify a project path:
-
-```bash
+# Another project
 pub_health --path ./my_flutter_app
-```
 
-Generate JSON:
-
-```bash
+# JSON for CI / tooling
 pub_health --format json
-```
 
-Save a Markdown report:
-
-```bash
+# Markdown report file
 pub_health --format markdown --output pub_health_report.md
-```
 
-Fail CI only for high or critical findings:
-
-```bash
+# Fail only on high or critical findings
 pub_health --fail-on high
-```
 
-Exclude packages:
-
-```bash
+# Skip noisy packages
 pub_health --exclude build_runner --exclude flutter_lints
 ```
 
@@ -98,9 +77,9 @@ pub_health --exclude build_runner --exclude flutter_lints
 | `--path` | `.` | Project directory to analyze |
 | `--format` | `console` | `console`, `json`, or `markdown` |
 | `--output` | — | Write report to a file |
-| `--fail-on` | `high` | Minimum severity for exit code 1 |
+| `--fail-on` | `high` | Minimum severity for exit code `1` |
 | `--include-transitive` | `true` | Include transitive dependencies |
-| `--exclude` | — | Package names to skip |
+| `--exclude` | — | Package names to skip (repeatable) |
 | `--stale-after-months` | `18` | Stale package threshold |
 | `--timeout` | `20` | Network timeout in seconds |
 | `--no-color` | — | Disable ANSI colors |
@@ -112,11 +91,11 @@ pub_health --exclude build_runner --exclude flutter_lints
 
 | Code | Meaning |
 |---|---|
-| 0 | Success, no findings at or above fail threshold |
-| 1 | Findings at or above fail threshold |
-| 2 | Invalid project, malformed YAML, or bad arguments |
-| 3 | Network/API failure after retries |
-| 4 | Internal unexpected error |
+| `0` | Success — nothing at or above the fail threshold |
+| `1` | Findings at or above the fail threshold |
+| `2` | Invalid project, malformed YAML, or bad arguments |
+| `3` | Network/API failure after retries |
+| `4` | Internal unexpected error |
 
 ## Example output
 
@@ -148,8 +127,6 @@ Risk level: Poor
 ```
 
 ## CI integration
-
-Create `.github/workflows/pub-health.yml`:
 
 ```yaml
 name: Dependency health
@@ -188,23 +165,19 @@ report:
   output: null
 ```
 
-Precedence:
-
-1. CLI flags
-2. `pub_health.yaml`
-3. Built-in defaults
+Precedence: **CLI flags → `pub_health.yaml` → built-in defaults**
 
 ## Rules
 
 | Rule | Severity | Description |
 |---|---|---|
-| outdated_dependency | medium | A newer compatible version is available |
-| discontinued_package | critical | The package is discontinued on pub.dev |
-| retracted_version | high | The locked version is retracted |
-| stale_package | medium | No release for the configured threshold |
-| sdk_constraint_risk | high | SDK constraint may be incompatible |
-| low_package_score | low | Package has a low pub.dev quality score |
-| unused_dependency | medium | Direct dependency has no detected import |
+| `outdated_dependency` | medium | A newer compatible version is available |
+| `discontinued_package` | critical | The package is discontinued on pub.dev |
+| `retracted_version` | high | The locked version is retracted |
+| `stale_package` | medium | No release within the configured threshold |
+| `sdk_constraint_risk` | high | SDK constraint may be incompatible |
+| `low_package_score` | low | Package has a low pub.dev quality score |
+| `unused_dependency` | medium | Direct dependency has no detected import |
 
 ## Library API
 
@@ -219,30 +192,33 @@ final report = await analyzeProject(
 print(report.healthScore.score);
 ```
 
-## Why pub_health?
+More examples: [example/basic_usage.md](example/basic_usage.md)
 
-`dart pub outdated` is excellent for checking available updates.
-`pub_health` complements it by answering broader questions:
+## Publishing (maintainers)
 
-- Which dependencies are risky?
-- Which packages are discontinued or retracted?
-- Which packages have not been maintained recently?
-- Which direct dependencies are unused?
-- What is the overall dependency health of this project?
-- What should CI fail on?
+Releases use [Trusted Publishing](https://dart.dev/tools/pub/automated-publishing)
+(OIDC) — no long-lived pub.dev token.
+
+1. Bump `version` in `pubspec.yaml` and update `CHANGELOG.md`
+2. Merge to `main`
+3. Tag and push: `git tag v0.2.0 && git push origin v0.2.0`
+
+The tag must match `v` + the `pubspec.yaml` version. Details:
+[docs/releasing.md](docs/releasing.md)
 
 ## Roadmap
 
-- v0.2.0: More accurate unused dependency detection.
-- v0.3.0: Alternative package suggestions.
-- v0.4.0: Security advisory integration.
-- v0.5.0: Android Gradle/AGP/Kotlin version matrix checks.
-- v1.0.0: Stable public API and plugin support.
+- **v0.2.0** — More accurate unused dependency detection
+- **v0.3.0** — Alternative package suggestions
+- **v0.4.0** — Security advisory integration
+- **v0.5.0** — Android Gradle/AGP/Kotlin version matrix checks
+- **v1.0.0** — Stable public API and plugin support
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). Bug reports and feature ideas welcome
+via [GitHub Issues](https://github.com/Ag1rin/pub_health/issues).
 
 ## License
 
-MIT
+[MIT](LICENSE)

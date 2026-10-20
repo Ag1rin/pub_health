@@ -19,6 +19,11 @@ dart test
 4. Prefer deterministic, mocked pub.dev responses in tests.
 5. Run format, analyze, and tests before opening a pull request.
 
+## Pull requests
+
+Use the PR template. Keep PRs focused; separate refactors from feature work
+when practical.
+
 ## Reporting issues
 
 Use the GitHub issue templates when possible. Include:
@@ -27,3 +32,8 @@ Use the GitHub issue templates when possible. Include:
 - `pub_health` version
 - Minimal reproduction steps
 - Whether the issue is a false positive
+
+## Releasing
+
+Maintainers: see [docs/releasing.md](docs/releasing.md) for Trusted Publishing
+(OIDC) releases. Do not add a long-lived pub.dev token to GitHub Secrets.

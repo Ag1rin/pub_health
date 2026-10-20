@@ -1,19 +1,19 @@
-# Publish to pub.dev using GitHub Actions Trusted Publishing (OIDC).
+# Trusted Publishing to pub.dev via OIDC (no long-lived token).
 # Docs: https://dart.dev/tools/pub/automated-publishing
+# Maintainer guide: docs/releasing.md
 #
-# Tag pattern on pub.dev must be: v{{version}}
+# pub.dev tag pattern must be: v{{version}}
 # Example: git tag v0.1.0 && git push origin v0.1.0
-# The tag version must match the `version` field in pubspec.yaml.
+# Tag version must match the `version` field in pubspec.yaml.
 name: Publish to pub.dev
 
 on:
   push:
     tags:
-      # must align with the tag-pattern configured on pub.dev
-      - 'v[0-9]+.[0-9]+.[0-9]+' # tag-pattern on pub.dev: 'v{{version}}'
+      - 'v[0-9]+.[0-9]+.[0-9]+' # pub.dev: v{{version}}
 
 jobs:
   publish:
     permissions:
-      id-token: write # Required for authentication using OIDC
+      id-token: write # Required for OIDC authentication
     uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
