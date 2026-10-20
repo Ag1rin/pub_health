@@ -35,5 +35,5 @@ Use the GitHub issue templates when possible. Include:
 
 ## Releasing
 
-Maintainers: see [docs/releasing.md](docs/releasing.md) for Trusted Publishing
+Maintainers: see [doc/releasing.md](doc/releasing.md) for Trusted Publishing
 (OIDC) releases. Do not add a long-lived pub.dev token to GitHub Secrets.

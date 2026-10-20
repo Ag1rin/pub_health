@@ -1,13 +1,12 @@
 name: pub_health
 description: >-
-  Audit the dependency health of Dart and Flutter projects.
-  Detect outdated, discontinued, retracted, stale, and unused
-  dependencies, then generate terminal, JSON, or Markdown reports.
-version: 0.1.0
+  Audit Dart and Flutter dependency health: find outdated,
+  discontinued, retracted, stale, and unused packages with
+  CI-ready reports.
+version: 0.1.1
 repository: https://github.com/Ag1rin/pub_health
 issue_tracker: https://github.com/Ag1rin/pub_health/issues
 homepage: https://github.com/Ag1rin/pub_health
-documentation: https://pub.dev/documentation/pub_health/latest/
 topics:
   - cli
   - dependencies

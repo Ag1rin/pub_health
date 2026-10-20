@@ -204,7 +204,7 @@ Releases use [Trusted Publishing](https://dart.dev/tools/pub/automated-publishin
 3. Tag and push: `git tag v0.2.0 && git push origin v0.2.0`
 
 The tag must match `v` + the `pubspec.yaml` version. Details:
-[docs/releasing.md](docs/releasing.md)
+[doc/releasing.md](doc/releasing.md)
 
 ## Roadmap
 

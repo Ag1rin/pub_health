@@ -1,6 +1,6 @@
 # Trusted Publishing to pub.dev via OIDC (no long-lived token).
 # Docs: https://dart.dev/tools/pub/automated-publishing
-# Maintainer guide: docs/releasing.md
+# Maintainer guide: doc/releasing.md
 #
 # pub.dev tag pattern must be: v{{version}}
 # Example: git tag v0.1.0 && git push origin v0.1.0
