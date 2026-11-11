@@ -1,7 +1,6 @@
 name: pub_health
 description: >-
-  Audit Dart and Flutter dependency health (outdated, discontinued, retracted,
-  stale, unused, license and platform risks) and fail the job on findings.
+  Audit Dart/Flutter dependency health and fail CI on risky or unused packages.
 author: Ag1rin
 branding:
   icon: shield
