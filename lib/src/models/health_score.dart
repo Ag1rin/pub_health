@@ -4,6 +4,7 @@ class HealthScore {
   const HealthScore({
     required this.score,
     required this.riskLevel,
+    this.categories = const {},
   });
 
   /// Score from 0 to 100.
@@ -13,10 +14,18 @@ class HealthScore {
   /// `critical`).
   final String riskLevel;
 
+  /// Per-category scores (0–100), keyed by category name
+  /// (e.g. `maintenance`, `compatibility`, `hygiene`, `licensing`).
+  ///
+  /// Only categories that contain at least one finding are listed; a missing
+  /// category means "no findings" (an implicit 100).
+  final Map<String, int> categories;
+
   /// Serializes to a JSON-compatible map.
   Map<String, Object?> toJson() => {
         'score': score,
         'riskLevel': riskLevel,
+        'categories': categories,
       };
 
   /// Derives the risk level label for a numeric [score].

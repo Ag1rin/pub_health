@@ -10,6 +10,8 @@ class Dependency {
     this.lockedVersion,
     this.source = 'hosted',
     this.isSdk = false,
+    this.declaredLine,
+    this.sourceUrl,
   });
 
   /// Package name (e.g. `http`).
@@ -30,6 +32,12 @@ class Dependency {
   /// Whether this is an SDK pseudo-package (Dart/Flutter).
   final bool isSdk;
 
+  /// 1-based line in `pubspec.yaml` where the dependency is declared.
+  final int? declaredLine;
+
+  /// Git URL or local path for `git` / `path` dependencies.
+  final String? sourceUrl;
+
   /// Serializes to a JSON-compatible map.
   Map<String, Object?> toJson() => {
         'name': name,
@@ -48,6 +56,8 @@ class Dependency {
     String? lockedVersion,
     String? source,
     bool? isSdk,
+    int? declaredLine,
+    String? sourceUrl,
   }) {
     return Dependency(
       name: name ?? this.name,
@@ -56,6 +66,8 @@ class Dependency {
       lockedVersion: lockedVersion ?? this.lockedVersion,
       source: source ?? this.source,
       isSdk: isSdk ?? this.isSdk,
+      declaredLine: declaredLine ?? this.declaredLine,
+      sourceUrl: sourceUrl ?? this.sourceUrl,
     );
   }
 
