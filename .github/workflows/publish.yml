@@ -3,7 +3,7 @@
 # Maintainer guide: doc/releasing.md
 #
 # pub.dev tag pattern must be: v{{version}}
-# Example: git tag v0.1.0 && git push origin v0.1.0
+# Example: git tag v0.2.0 && git push origin v0.2.0
 # Tag version must match the `version` field in pubspec.yaml.
 name: Publish to pub.dev
 

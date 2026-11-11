@@ -10,7 +10,7 @@ assignees: ""
 A clear description of what went wrong.
 
 **pub_health version**
-e.g. 0.1.0
+e.g. 0.2.0
 
 **Dart / Flutter version**
 e.g. Dart 3.5.0
