@@ -10,6 +10,7 @@ class LockfileData {
   const LockfileData({
     required this.packages,
     this.missing = false,
+    this.workspaceRoot,
   });
 
   /// Package name → locked dependency details.
@@ -17,6 +18,10 @@ class LockfileData {
 
   /// Whether pubspec.lock was missing.
   final bool missing;
+
+  /// Directory of the pub workspace root whose lockfile was used, when the
+  /// project itself has no `pubspec.lock` (Dart 3.6+ workspaces).
+  final String? workspaceRoot;
 }
 
 /// A single package entry from pubspec.lock.
@@ -46,13 +51,51 @@ class LockedPackage {
 /// Reads and interprets pubspec.lock.
 class LockfileAnalyzer {
   /// Parses pubspec.lock under [projectPath].
+  ///
+  /// Workspace members share a single lockfile in the workspace root, so when
+  /// [projectPath] has none, parent directories are searched for a workspace
+  /// root that does.
   Future<LockfileData> analyze(String projectPath) async {
     final path = FileUtils.join(projectPath, 'pubspec.lock');
     final content = await FileUtils.readText(path);
-    if (content == null) {
-      return const LockfileData(packages: {}, missing: true);
+    if (content != null) return parse(content);
+
+    final root = await findWorkspaceRoot(projectPath);
+    if (root != null) {
+      final rootContent =
+          await FileUtils.readText(FileUtils.join(root, 'pubspec.lock'));
+      if (rootContent != null) {
+        final parsed = parse(rootContent);
+        return LockfileData(
+          packages: parsed.packages,
+          workspaceRoot: root,
+        );
+      }
     }
-    return parse(content);
+    return const LockfileData(packages: {}, missing: true);
+  }
+
+  /// Finds the closest ancestor of [projectPath] that is a pub workspace root
+  /// (has a `workspace:` list and a `pubspec.lock`), or null.
+  Future<String?> findWorkspaceRoot(String projectPath) async {
+    var current = FileUtils.parent(FileUtils.absolute(projectPath));
+    for (var depth = 0; depth < 8; depth++) {
+      final pubspec =
+          await FileUtils.readText(FileUtils.join(current, 'pubspec.yaml'));
+      if (pubspec != null &&
+          FileUtils.fileExists(FileUtils.join(current, 'pubspec.lock'))) {
+        try {
+          final map = YamlUtils.parseMap(pubspec);
+          if (map['workspace'] is Iterable) return current;
+        } on YamlParseException {
+          // Not a usable pubspec; keep walking up.
+        }
+      }
+      final next = FileUtils.parent(current);
+      if (next == current) break;
+      current = next;
+    }
+    return null;
   }
 
   /// Parses [content] as a pubspec.lock document.
