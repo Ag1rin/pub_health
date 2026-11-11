@@ -151,6 +151,7 @@ class PubHealthCommandRunner {
         options.format,
         color: options.color,
         failOn: options.failOn,
+        baseDirectory: projectPath,
       );
       final output = reporter.report(report);
 

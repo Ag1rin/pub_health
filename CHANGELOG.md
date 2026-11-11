@@ -56,11 +56,9 @@ and this project adheres to Semantic Versioning.
 - Version string drift between `pubspec.yaml` and the CLI.
 - Reports showed `Project: /path/to/app/.` when run without `--path`; the
   project path is now normalized.
-
-All notable changes to this project will be documented in this file.
-
-The format is based on Keep a Changelog,
-and this project adheres to Semantic Versioning.
+- SARIF reports now make artifact paths relative to the analyzed project
+  root (the CLI previously left `baseDirectory` unset).
+- Removed a duplicated changelog header before the `0.1.1` section.
 
 ## 0.1.1
 
