@@ -96,7 +96,7 @@ runs:
         IN_SUMMARY: ${{ inputs.summary }}
         IN_ARGS: ${{ inputs.args }}
       run: |
-        set -uo pipefail
+        set -euo pipefail
         export PATH="$HOME/.pub-cache/bin:$PATH"
 
         common=(--path "$IN_PATH" --fail-on "$IN_FAIL_ON" --no-color)
@@ -108,13 +108,15 @@ runs:
         fi
 
         # 1) The report the user asked for.
+        # Capture exit status without tripping set -e; the following step
+        # applies fail-on-findings so this step can still emit outputs.
         main=("${common[@]}" --format "$IN_FORMAT")
         if [ -n "$IN_OUTPUT" ]; then
           main+=(--output "$IN_OUTPUT")
           echo "report-path=$IN_OUTPUT" >> "$GITHUB_OUTPUT"
         fi
-        pub_health "${main[@]}"
-        code=$?
+        code=0
+        pub_health "${main[@]}" || code=$?
         echo "exit-code=$code" >> "$GITHUB_OUTPUT"
 
         # 2) Machine-readable score for the step outputs. Responses are

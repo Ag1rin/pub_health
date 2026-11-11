@@ -5,6 +5,63 @@ All notable changes to this project will be documented in this file.
 The format is based on Keep a Changelog,
 and this project adheres to Semantic Versioning.
 
+## 0.2.0
+
+### Added
+- **New rules**
+  - `dependency_override` – flags `dependency_overrides:` entries.
+  - `git_dependency` – flags dependencies fetched from git.
+  - `unconstrained_dependency` – flags `any`/missing constraints and open
+    upper bounds.
+  - `misplaced_dependency` – dev dependencies imported from `lib/`/`bin/`, and
+    tooling packages listed under `dependencies`.
+  - `license_risk` – unknown licenses, plus `licenses.allow` / `licenses.deny`
+    policies (uses pub.dev `license:*` tags).
+  - `platform_support` – direct dependencies must support the configured
+    `platforms:` and, with `wasm: true`, be WebAssembly-ready.
+  - `unverified_publisher` – low-adoption packages without a verified publisher.
+- **Output formats**: `sarif` (GitHub code scanning), `html` (self-contained),
+  `junit` (GitLab/Azure/Jenkins) and `badge` (shields.io endpoint JSON).
+- **Adoption tooling**: `--baseline` / `--update-baseline`, `ignore:` entries
+  with `reason` and `expires`, per-rule `severity:` overrides, and warnings for
+  unused/expired ignores and unknown rule IDs or config keys.
+- **`pub_health init`** writes a documented starter `pub_health.yaml`;
+  `doc/pub_health.schema.json` adds editor completion and validation.
+- **Fix hints**: findings carry a `suggestedCommand` (`dart|flutter pub …`),
+  shown in console, Markdown and HTML reports. pub_health still never edits
+  your project.
+- **Per-category scores** (`maintenance`, `compatibility`, `hygiene`,
+  `licensing`) in every report; the overall score is unchanged for existing
+  rules.
+- **`--compare-to <report.json>`** shows the score delta and new/resolved
+  findings against a previous JSON report.
+- **`--recursive`** analyzes monorepos and Dart pub workspaces (members share
+  the workspace root's `pubspec.lock`).
+- **Persistent cache** of pub.dev responses (`--cache-dir`, `--no-cache`,
+  `--cache-ttl-hours`), negative caching of 404s, stale-cache fallback when
+  pub.dev is unreachable, and `--offline` mode.
+- **`--pub-url`** / `pub-url:` / `PUB_HOSTED_URL` for pub mirrors.
+- Composite **GitHub Action** (`action.yml`) and CI recipes in `doc/ci.md`.
+- JSON reports now include `categories`, `suppressedCount`, `warnings`, and
+  (when applicable) `comparison` and `projects`; finding metadata includes the
+  `file` and `line` it refers to.
+
+### Changed
+- New rules are enabled by default, so scores of existing projects may drop.
+  Disable any with `disable-rules:` or adjust with `severity:`.
+- `--version` and the HTTP `User-Agent` now come from a single constant that a
+  test keeps in sync with `pubspec.yaml` (it previously reported `0.1.0`).
+
+### Fixed
+- Version string drift between `pubspec.yaml` and the CLI.
+- Reports showed `Project: /path/to/app/.` when run without `--path`; the
+  project path is now normalized.
+
+All notable changes to this project will be documented in this file.
+
+The format is based on Keep a Changelog,
+and this project adheres to Semantic Versioning.
+
 ## 0.1.1
 
 ### Fixed
