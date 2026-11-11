@@ -90,6 +90,29 @@ class PubDevPackageInfo {
     );
   }
 
+  /// Restores metadata from the output of [toJson] (disk cache format).
+  factory PubDevPackageInfo.fromCacheJson(Map<String, dynamic> json) {
+    final versions = (json['versions'] as List<dynamic>? ?? const [])
+        .whereType<Map>()
+        .map((v) => PubDevVersionInfo.fromJson(Map<String, dynamic>.from(v)))
+        .toList();
+    final scoreJson = json['score'];
+    return PubDevPackageInfo(
+      name: (json['name'] ?? '').toString(),
+      latestVersion: (json['latestVersion'] ?? '').toString(),
+      latestPublished:
+          DateTime.tryParse(json['latestPublished']?.toString() ?? '')?.toUtc(),
+      discontinued: json['discontinued'] == true,
+      replacedBy: json['replacedBy']?.toString(),
+      versions: versions,
+      sdkConstraint: json['sdkConstraint']?.toString(),
+      score: scoreJson is Map
+          ? PubDevScoreInfo.fromJson(Map<String, dynamic>.from(scoreJson))
+          : null,
+      notFound: json['notFound'] == true,
+    );
+  }
+
   /// Serializes to a JSON-compatible map.
   Map<String, Object?> toJson() => {
         'name': name,

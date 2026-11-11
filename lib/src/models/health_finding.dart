@@ -34,6 +34,25 @@ class HealthFinding {
   /// Extra structured metadata for reporters / tooling.
   final Map<String, Object?> metadata;
 
+  /// Stable key used by baselines and ignore rules (`ruleId|package`).
+  String get key => '$ruleId|$package';
+
+  /// Creates a copy with selected fields replaced.
+  HealthFinding copyWith({
+    Severity? severity,
+    Map<String, Object?>? metadata,
+  }) {
+    return HealthFinding(
+      ruleId: ruleId,
+      package: package,
+      severity: severity ?? this.severity,
+      title: title,
+      detail: detail,
+      recommendation: recommendation,
+      metadata: metadata ?? this.metadata,
+    );
+  }
+
   /// Serializes to a JSON-compatible map.
   Map<String, Object?> toJson() => {
         'ruleId': ruleId,
