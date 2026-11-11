@@ -1,3 +1,4 @@
+import '../models/dependency_kind.dart';
 import '../models/health_finding.dart';
 import '../models/severity.dart';
 import '../utils/version_utils.dart';
@@ -41,6 +42,10 @@ class OutdatedRule extends Rule {
             'lockedVersion': dep.lockedVersion,
             'latestVersion': info.latestVersion,
             'upgradeType': bump.name,
+            'suggestedCommand': bump == VersionBump.major &&
+                    dep.kind != DependencyKind.transitive
+                ? '${context.pubTool} pub upgrade --major-versions ${dep.name}'
+                : '${context.pubTool} pub upgrade ${dep.name}',
           },
         ),
       );

@@ -1,4 +1,5 @@
 import '../models/dependency.dart';
+import '../models/dependency_override.dart';
 import '../models/health_finding.dart';
 import '../models/pub_dev_package_info.dart';
 import '../models/pub_health_options.dart';
@@ -13,6 +14,9 @@ class RuleContext {
     required this.unusedPackages,
     required this.options,
     this.projectSdkConstraint,
+    this.overrides = const [],
+    this.productionImports = const {},
+    this.isFlutter = false,
   });
 
   /// Absolute project path.
@@ -32,6 +36,18 @@ class RuleContext {
 
   /// Project Dart SDK constraint from pubspec.
   final String? projectSdkConstraint;
+
+  /// Entries of `dependency_overrides:` in pubspec.yaml.
+  final List<DependencyOverride> overrides;
+
+  /// Packages imported from shipped code (`lib/`, `bin/`).
+  final Set<String> productionImports;
+
+  /// Whether the project depends on the Flutter SDK.
+  final bool isFlutter;
+
+  /// `dart` or `flutter`, for suggested shell commands.
+  String get pubTool => isFlutter ? 'flutter' : 'dart';
 
   /// Returns package info for [name], if fetched.
   PubDevPackageInfo? infoFor(String name) => packageInfo[name];
