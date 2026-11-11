@@ -4,7 +4,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/pub_dev_package_info.dart';
+import '../version.dart';
 import 'pub_dev_cache.dart';
+import 'pub_dev_disk_cache.dart';
 
 /// Client for the public pub.dev API.
 class PubDevClient {
@@ -15,8 +17,11 @@ class PubDevClient {
     this.baseUrl = 'https://pub.dev',
     this.timeout = const Duration(seconds: 20),
     this.maxRetries = 3,
+    PubDevDiskCache? diskCache,
+    this.offline = false,
   })  : _httpClient = httpClient ?? http.Client(),
         _cache = cache ?? PubDevCache(),
+        _diskCache = diskCache,
         _ownsClient = httpClient == null;
 
   /// API base URL (overridable for tests).
@@ -28,15 +33,73 @@ class PubDevClient {
   /// Max retry attempts for 429 / 5xx.
   final int maxRetries;
 
+  /// When true, the network is never used; only cached data is served.
+  final bool offline;
+
+  /// Non-fatal notes collected while fetching (stale cache fallbacks, …).
+  final List<String> diagnostics = [];
+
   final http.Client _httpClient;
   final PubDevCache _cache;
+  final PubDevDiskCache? _diskCache;
   final bool _ownsClient;
 
-  /// Fetches package metadata and score, using the in-memory cache.
+  /// Fetches package metadata and score.
+  ///
+  /// Lookup order: in-memory cache → fresh on-disk cache → network. If the
+  /// network fails for a reason other than "not found", a stale on-disk entry
+  /// is used (with a note in [diagnostics]) rather than failing the run.
   Future<PubDevPackageInfo> fetchPackage(String name) async {
     final cached = _cache.getPackage(name);
     if (cached != null) return cached;
 
+    final disk = _diskCache;
+    if (disk != null) {
+      final fresh = await disk.read(name, allowStale: offline);
+      if (fresh != null) {
+        // A cached "not found" must behave exactly like a live 404.
+        if (fresh.notFound) throw _notFound(name);
+        _cache.putPackage(name, fresh);
+        return fresh;
+      }
+    }
+
+    if (offline) {
+      throw PubDevOfflineException(name);
+    }
+
+    try {
+      final info = await _fetchFromNetwork(name);
+      await disk?.write(name, info);
+      return info;
+    } on PubDevClientException catch (e) {
+      if (e.isNotFound) {
+        // Remember misses (private / unpublished packages) so repeat and
+        // offline runs neither re-request them nor warn about them.
+        await disk?.write(
+          name,
+          PubDevPackageInfo(name: name, latestVersion: '', notFound: true),
+        );
+        rethrow;
+      }
+      if (disk == null) rethrow;
+      final stale = await disk.readEntry(name);
+      if (stale == null || stale.info.notFound) rethrow;
+      diagnostics.add(
+        'pub.dev was unreachable for $name; using data cached on '
+        '${stale.cachedAt.toIso8601String().substring(0, 10)}.',
+      );
+      _cache.putPackage(name, stale.info);
+      return stale.info;
+    }
+  }
+
+  PubDevClientException _notFound(String name) => PubDevClientException(
+        'Package not found: $name (cached)',
+        statusCode: 404,
+      );
+
+  Future<PubDevPackageInfo> _fetchFromNetwork(String name) async {
     final packageJson = await _getJson('/api/packages/$name');
     PubDevScoreInfo? score;
     try {
@@ -69,7 +132,7 @@ class PubDevClient {
           uri,
           headers: const {
             'Accept': 'application/json',
-            'User-Agent': 'pub_health/0.1.0',
+            'User-Agent': 'pub_health/$pubHealthVersion',
           },
         ).timeout(timeout);
 
@@ -130,6 +193,16 @@ class PubDevClient {
       }
     }
   }
+}
+
+/// Raised in offline mode when a package is not in the on-disk cache.
+class PubDevOfflineException extends PubDevClientException {
+  /// Creates an offline-miss exception for [package].
+  PubDevOfflineException(this.package)
+      : super('Offline mode: no cached pub.dev data for $package.');
+
+  /// Package that was not cached.
+  final String package;
 }
 
 /// Error from the pub.dev client.
