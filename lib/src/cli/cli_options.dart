@@ -48,7 +48,7 @@ class CliOptions {
       ..addOption(
         'format',
         abbr: 'f',
-        allowed: ['console', 'json', 'markdown'],
+        allowed: ReportFormatX.names,
         help: 'Output format.',
       )
       ..addOption(
@@ -92,6 +92,58 @@ class CliOptions {
       ..addMultiOption(
         'disable-rule',
         help: 'Rule IDs to disable.',
+      )
+      ..addOption(
+        'baseline',
+        help: 'Baseline file; findings recorded in it are suppressed.',
+      )
+      ..addFlag(
+        'update-baseline',
+        negatable: false,
+        help: 'Write current findings to the --baseline file and exit 0.',
+      )
+      ..addOption(
+        'compare-to',
+        help: 'Previous JSON report to compare against (score delta, '
+            'new/resolved findings).',
+      )
+      ..addFlag(
+        'cache',
+        defaultsTo: null,
+        help: 'Use the on-disk pub.dev cache (default: on).',
+      )
+      ..addOption(
+        'cache-dir',
+        help: 'Directory for the on-disk cache.',
+      )
+      ..addOption(
+        'cache-ttl-hours',
+        help: 'Hours a cached pub.dev response stays fresh (default 6).',
+      )
+      ..addFlag(
+        'offline',
+        negatable: false,
+        help: 'Never use the network; rely on the on-disk cache only.',
+      )
+      ..addFlag(
+        'recursive',
+        abbr: 'r',
+        defaultsTo: null,
+        help: 'Analyze every Dart project below --path (monorepo/workspace).',
+      )
+      ..addMultiOption(
+        'exclude-project',
+        help: 'Project directory to skip in recursive mode.',
+      )
+      ..addOption(
+        'pub-url',
+        help: 'pub server API base URL (mirror). Defaults to '
+            r'$PUB_HOSTED_URL or https://pub.dev.',
+      )
+      ..addFlag(
+        'force',
+        negatable: false,
+        help: 'With `init`: overwrite an existing pub_health.yaml.',
       );
   }
 
@@ -154,6 +206,19 @@ class CliOptions {
       color = results['color'] as bool;
     }
 
+    int? cacheTtlHours;
+    if (results.wasParsed('cache-ttl-hours')) {
+      cacheTtlHours = int.tryParse(results['cache-ttl-hours'] as String);
+      if (cacheTtlHours == null || cacheTtlHours <= 0) {
+        throw CliArgumentException('Invalid --cache-ttl-hours value.');
+      }
+    }
+
+    final updateBaseline = results['update-baseline'] as bool? ?? false;
+    if (updateBaseline && !results.wasParsed('baseline')) {
+      throw CliArgumentException('--update-baseline requires --baseline.');
+    }
+
     final options = PubHealthOptions(
       failOn: failOn ?? Severity.high,
       includeTransitive: includeTransitive ?? true,
@@ -165,6 +230,16 @@ class CliOptions {
       format: format ?? ReportFormat.console,
       outputPath: results['output'] as String?,
       disabledRules: disabled,
+      pubDevBaseUrl: results['pub-url'] as String? ?? 'https://pub.dev',
+      baselinePath: results['baseline'] as String?,
+      updateBaseline: updateBaseline,
+      compareTo: results['compare-to'] as String?,
+      useCache: results['cache'] as bool? ?? true,
+      cacheDir: results['cache-dir'] as String?,
+      cacheTtl: Duration(hours: cacheTtlHours ?? 6),
+      offline: results['offline'] as bool? ?? false,
+      recursive: results['recursive'] as bool? ?? false,
+      excludeProjects: (results['exclude-project'] as List<String>).toSet(),
     );
 
     return CliOptions(

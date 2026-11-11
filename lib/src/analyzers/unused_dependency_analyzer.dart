@@ -4,6 +4,24 @@ import '../models/dependency.dart';
 import '../models/dependency_kind.dart';
 import '../utils/file_utils.dart';
 
+/// Package imports found in a project, split by where they occur.
+class ImportUsage {
+  /// Creates an import usage summary.
+  const ImportUsage({
+    this.production = const {},
+    this.nonProduction = const {},
+  });
+
+  /// Packages imported or exported from shipped code (`lib/`, `bin/`).
+  final Set<String> production;
+
+  /// Packages imported only from non-shipped code (`test/`, …).
+  final Set<String> nonProduction;
+
+  /// Every imported package.
+  Set<String> get all => {...production, ...nonProduction};
+}
+
 /// Detects direct runtime dependencies that appear unused based on imports.
 class UnusedDependencyAnalyzer {
   /// Package names that are commonly used without a matching import.
@@ -44,6 +62,9 @@ class UnusedDependencyAnalyzer {
   /// Roots scanned for Dart imports.
   static const List<String> defaultRoots = ['lib', 'bin', 'test'];
 
+  /// Roots whose code ships to package consumers / end users.
+  static const List<String> productionRoots = ['lib', 'bin'];
+
   /// Returns names of unused direct runtime dependencies.
   Future<Set<String>> findUnused({
     required String projectPath,
@@ -51,18 +72,51 @@ class UnusedDependencyAnalyzer {
     Set<String> allowList = defaultAllowList,
     List<String> roots = defaultRoots,
   }) async {
-    final candidates = dependencies
+    if (_candidates(dependencies, allowList).isEmpty) return {};
+    final imported = await _collectImportedPackages(projectPath, roots);
+    return unusedFrom(
+      ImportUsage(production: imported),
+      dependencies,
+      allowList: allowList,
+    );
+  }
+
+  /// Derives unused direct dependencies from an already computed [usage].
+  Set<String> unusedFrom(
+    ImportUsage usage,
+    List<Dependency> dependencies, {
+    Set<String> allowList = defaultAllowList,
+  }) {
+    return _candidates(dependencies, allowList).difference(usage.all);
+  }
+
+  Set<String> _candidates(
+    List<Dependency> dependencies,
+    Set<String> allowList,
+  ) {
+    return dependencies
         .where((d) => d.kind == DependencyKind.direct)
         .where((d) => !d.isSdk)
         .where((d) => d.source == 'hosted')
         .where((d) => !allowList.contains(d.name))
         .map((d) => d.name)
         .toSet();
+  }
 
-    if (candidates.isEmpty) return {};
-
-    final imported = await _collectImportedPackages(projectPath, roots);
-    return candidates.difference(imported);
+  /// Collects imports, separating shipped code from everything else.
+  Future<ImportUsage> collectUsage(
+    String projectPath, {
+    List<String> roots = defaultRoots,
+  }) async {
+    final production = await _collectImportedPackages(
+      projectPath,
+      roots.where(productionRoots.contains).toList(),
+    );
+    final everything = await _collectImportedPackages(projectPath, roots);
+    return ImportUsage(
+      production: production,
+      nonProduction: everything.difference(production),
+    );
   }
 
   Future<Set<String>> _collectImportedPackages(
@@ -70,6 +124,7 @@ class UnusedDependencyAnalyzer {
     List<String> roots,
   ) async {
     final imported = <String>{};
+    if (roots.isEmpty) return imported;
     final files = FileUtils.listDartFiles(projectPath, roots);
     final importPattern = RegExp(
       r'''^\s*import\s+['"]package:([^/'"]+)/''',
