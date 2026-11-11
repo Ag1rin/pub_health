@@ -3,6 +3,7 @@ import '../models/dependency_report.dart';
 import '../models/health_finding.dart';
 import '../models/severity.dart';
 import '../utils/string_utils.dart';
+import 'report_utils.dart';
 import 'reporter.dart';
 
 /// Colored (optional) terminal reporter.
@@ -61,7 +62,32 @@ class ConsoleReporter implements Reporter {
 
     buffer.writeln('Direct dependencies: $direct');
     buffer.writeln('Transitive dependencies: $transitive');
+    if (report.projects.isNotEmpty) {
+      buffer.writeln('Projects analyzed: ${report.projects.length}');
+    }
+    if (report.suppressed.isNotEmpty) {
+      buffer.writeln(
+        'Suppressed findings: ${report.suppressed.length} '
+        '(ignore rules / baseline)',
+      );
+    }
     buffer.writeln();
+
+    final comparison = report.comparison;
+    if (comparison != null) {
+      final sign = comparison.delta > 0 ? '+' : '';
+      buffer.writeln(
+        'Compared to previous report: ${comparison.previousScore} → '
+        '${comparison.currentScore} ($sign${comparison.delta}), '
+        '${comparison.newFindings.length} new, '
+        '${comparison.resolvedFindings.length} resolved',
+      );
+      for (final key in comparison.newFindings) {
+        buffer.writeln('  + $key');
+      }
+      buffer.writeln();
+    }
+
     buffer.writeln(
       'Overall dependency health: '
       '${report.healthScore.score}/100',
@@ -69,6 +95,21 @@ class ConsoleReporter implements Reporter {
     buffer.writeln(
       'Risk level: ${report.healthScore.displayRiskLevel}',
     );
+    final categories = report.healthScore.categories;
+    if (categories.isNotEmpty) {
+      final names = categories.keys.toList()..sort();
+      buffer.writeln(
+        'By category: ${names.map((n) => '$n ${categories[n]}').join(', ')}',
+      );
+    }
+
+    if (report.warnings.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln(_paint('Notes', _bold));
+      for (final warning in report.warnings) {
+        buffer.writeln(_paint('  - $warning', _dim));
+      }
+    }
     return buffer.toString();
   }
 
@@ -84,14 +125,23 @@ class ConsoleReporter implements Reporter {
     for (final finding in findings) {
       final version = finding.metadata['lockedVersion'];
       final versionSuffix = version == null ? '' : ' $version';
+      final project = ReportUtils.projectOf(finding);
+      final projectSuffix = project == null ? '' : '  [$project]';
       buffer.writeln(
-        _paint('$bullet ${finding.package}$versionSuffix', colorCode),
+        _paint(
+          '$bullet ${finding.package}$versionSuffix$projectSuffix',
+          colorCode,
+        ),
       );
       buffer.writeln('  Rule: ${finding.ruleId}');
       buffer.writeln('  ${finding.detail}');
       buffer.writeln(
         _paint('  Recommendation: ${finding.recommendation}', _dim),
       );
+      final command = ReportUtils.commandOf(finding);
+      if (command != null) {
+        buffer.writeln(_paint('  Try: $command', _dim));
+      }
       buffer.writeln();
     }
   }
