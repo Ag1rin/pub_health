@@ -8,60 +8,20 @@ import 'package:pub_health/src/cli/exit_codes.dart';
 import 'package:pub_health/src/clients/pub_dev_client.dart';
 import 'package:pub_health/src/models/dependency_report.dart';
 import 'package:pub_health/src/models/pub_health_options.dart';
+import 'package:pub_health/src/version.dart';
 import 'package:test/test.dart';
 
 import '../support/fixture_projects.dart';
+import '../support/memory_sink.dart';
 import '../support/mock_pub_dev_client.dart';
 
-class _MemorySink implements IOSink {
-  final StringBuffer buffer = StringBuffer();
-
-  @override
-  Encoding encoding = utf8;
-
-  @override
-  void add(List<int> data) => buffer.write(utf8.decode(data));
-
-  @override
-  void addError(Object error, [StackTrace? stackTrace]) {}
-
-  @override
-  void write(Object? object) => buffer.write(object);
-
-  @override
-  void writeAll(Iterable objects, [String separator = '']) =>
-      buffer.writeAll(objects, separator);
-
-  @override
-  void writeln([Object? object = '']) => buffer.writeln(object);
-
-  @override
-  void writeCharCode(int charCode) => buffer.writeCharCode(charCode);
-
-  @override
-  Future addStream(Stream<List<int>> stream) async {
-    await for (final chunk in stream) {
-      add(chunk);
-    }
-  }
-
-  @override
-  Future flush() async {}
-
-  @override
-  Future close() async {}
-
-  @override
-  Future get done => Future.value();
-}
-
 void main() {
-  late _MemorySink out;
-  late _MemorySink err;
+  late MemorySink out;
+  late MemorySink err;
 
   setUp(() {
-    out = _MemorySink();
-    err = _MemorySink();
+    out = MemorySink();
+    err = MemorySink();
   });
 
   PubHealthCommandRunner runnerFor(PubHealthOptions options) {
@@ -98,7 +58,7 @@ void main() {
     );
     final code = await runner.run(['--version']);
     expect(code, ExitCodes.success);
-    expect(out.buffer.toString(), contains('0.1.0'));
+    expect(out.buffer.toString(), contains(pubHealthVersion));
   });
 
   test('invalid args return exit code 2', () async {
