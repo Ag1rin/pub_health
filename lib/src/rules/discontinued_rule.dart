@@ -1,3 +1,4 @@
+import '../models/dependency_kind.dart';
 import '../models/health_finding.dart';
 import '../models/severity.dart';
 import 'rule.dart';
@@ -36,6 +37,9 @@ class DiscontinuedRule extends Rule {
             'lockedVersion': dep.lockedVersion,
             'latestVersion': info.latestVersion,
             if (replacement != null) 'replacedBy': replacement,
+            if (replacement != null && dep.kind != DependencyKind.transitive)
+              'suggestedCommand': '${context.pubTool} pub remove ${dep.name} '
+                  '&& ${context.pubTool} pub add $replacement',
           },
         ),
       );

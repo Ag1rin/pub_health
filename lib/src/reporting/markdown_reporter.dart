@@ -1,6 +1,7 @@
 import '../models/dependency_report.dart';
 import '../models/severity.dart';
 import '../utils/string_utils.dart';
+import 'report_utils.dart';
 import 'reporter.dart';
 
 /// Markdown reporter with severity tables.
@@ -23,6 +24,24 @@ class MarkdownReporter implements Reporter {
     buffer.writeln(
       '**Risk level:** ${report.healthScore.displayRiskLevel}',
     );
+    final categories = report.healthScore.categories;
+    if (categories.isNotEmpty) {
+      final names = categories.keys.toList()..sort();
+      buffer.writeln(
+        '**By category:** '
+        '${names.map((n) => '$n ${categories[n]}/100').join(' · ')}',
+      );
+    }
+    final comparison = report.comparison;
+    if (comparison != null) {
+      final sign = comparison.delta > 0 ? '+' : '';
+      buffer.writeln(
+        '**Compared to previous report:** ${comparison.previousScore} → '
+        '${comparison.currentScore} ($sign${comparison.delta}); '
+        '${comparison.newFindings.length} new, '
+        '${comparison.resolvedFindings.length} resolved',
+      );
+    }
     buffer.writeln();
 
     for (final severity in Severity.values.reversed) {
@@ -34,8 +53,12 @@ class MarkdownReporter implements Reporter {
       buffer.writeln('| Package | Rule | Detail | Recommendation |');
       buffer.writeln('|---|---|---|---|');
       for (final finding in findings) {
+        final project = ReportUtils.projectOf(finding);
+        final packageCell = project == null
+            ? finding.package
+            : '${finding.package} (`$project`)';
         buffer.writeln(
-          '| ${_escape(finding.package)} | ${_escape(finding.ruleId)} | '
+          '| ${_escape(packageCell)} | ${_escape(finding.ruleId)} | '
           '${_escape(_short(finding.detail))} | '
           '${_escape(_short(finding.recommendation))} |',
         );
@@ -58,6 +81,33 @@ class MarkdownReporter implements Reporter {
     buffer.writeln('- High: ${report.countBySeverity(Severity.high)}');
     buffer.writeln('- Medium: ${report.countBySeverity(Severity.medium)}');
     buffer.writeln('- Low: ${report.countBySeverity(Severity.low)}');
+    if (report.suppressed.isNotEmpty) {
+      buffer.writeln('- Suppressed: ${report.suppressed.length}');
+    }
+
+    final commands = <String>[
+      for (final f in report.findings)
+        if (ReportUtils.commandOf(f) != null) ReportUtils.commandOf(f)!,
+    ];
+    if (commands.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('## Suggested commands');
+      buffer.writeln();
+      buffer.writeln('```sh');
+      for (final command in commands) {
+        buffer.writeln(command);
+      }
+      buffer.writeln('```');
+    }
+
+    if (report.warnings.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('## Notes');
+      buffer.writeln();
+      for (final warning in report.warnings) {
+        buffer.writeln('- ${_escape(warning)}');
+      }
+    }
     return buffer.toString();
   }
 
