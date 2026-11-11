@@ -24,3 +24,7 @@ Thumbs.db
 # Generated reports
 pub_health_report.json
 pub_health_report.md
+
+# Local pub cache (never commit)
+.pub-cache/
+
