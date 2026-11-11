@@ -41,6 +41,8 @@ class UnusedDependencyRule extends Rule {
           metadata: {
             'lockedVersion': dep.lockedVersion,
             'constraint': dep.constraint,
+            'line': dep.declaredLine,
+            'suggestedCommand': '${context.pubTool} pub remove $name',
           },
         ),
       );
