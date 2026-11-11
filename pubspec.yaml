@@ -3,7 +3,7 @@ description: >-
   Audit Dart and Flutter dependency health: find outdated,
   discontinued, retracted, stale, and unused packages with
   CI-ready reports.
-version: 0.1.1
+version: 0.2.0
 repository: https://github.com/Ag1rin/pub_health
 issue_tracker: https://github.com/Ag1rin/pub_health/issues
 homepage: https://github.com/Ag1rin/pub_health
@@ -30,3 +30,7 @@ dependencies:
 dev_dependencies:
   lints: ^4.0.0
   test: ^1.25.0
+
+screenshots:
+  - description: pub_health auditing a project, then adopting a baseline so CI only fails on new findings.
+    path: doc/demo.gif

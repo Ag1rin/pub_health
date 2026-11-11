@@ -1,0 +1,153 @@
+name: pub_health
+description: >-
+  Audit Dart and Flutter dependency health (outdated, discontinued, retracted,
+  stale, unused, license and platform risks) and fail the job on findings.
+author: Ag1rin
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  path:
+    description: Project directory to analyze.
+    default: "."
+  format:
+    description: >-
+      Report format: console, json, markdown, sarif, html, junit or badge.
+    default: console
+  output:
+    description: Write the report to this file instead of the job log.
+    default: ""
+  fail-on:
+    description: Minimum severity that fails the job (low, medium, high, critical).
+    default: high
+  fail-on-findings:
+    description: >-
+      When "false", findings never fail the step (only real errors such as an
+      invalid project or network failure do).
+    default: "true"
+  recursive:
+    description: Analyze every Dart project below `path` (monorepo / workspace).
+    default: "false"
+  baseline:
+    description: Baseline file; only findings not recorded in it are reported.
+    default: ""
+  summary:
+    description: Append a Markdown report to the job summary.
+    default: "true"
+  version:
+    description: >-
+      pub_health version to install (e.g. "0.2.0" or "^0.2.0"). Empty means
+      the latest release.
+    default: ""
+  dart-sdk:
+    description: Dart SDK channel or version passed to dart-lang/setup-dart.
+    default: stable
+  args:
+    description: Extra command-line arguments, separated by spaces.
+    default: ""
+
+outputs:
+  score:
+    description: Overall dependency health score (0-100).
+    value: ${{ steps.analyze.outputs.score }}
+  risk-level:
+    description: Risk level (excellent, good, medium, poor, critical).
+    value: ${{ steps.analyze.outputs.risk-level }}
+  exit-code:
+    description: Exit code of pub_health (0 = no findings at/above fail-on).
+    value: ${{ steps.analyze.outputs.exit-code }}
+  report-path:
+    description: Path of the written report, when `output` was set.
+    value: ${{ steps.analyze.outputs.report-path }}
+
+runs:
+  using: composite
+  steps:
+    - uses: dart-lang/setup-dart@v1
+      with:
+        sdk: ${{ inputs.dart-sdk }}
+
+    - name: Install pub_health
+      shell: bash
+      env:
+        PUB_HEALTH_VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        if [ -n "$PUB_HEALTH_VERSION" ]; then
+          dart pub global activate pub_health "$PUB_HEALTH_VERSION"
+        else
+          dart pub global activate pub_health
+        fi
+        echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+    - name: Analyze dependencies
+      id: analyze
+      shell: bash
+      env:
+        # Inputs are passed through the environment (never interpolated into
+        # the script) so they cannot inject shell code.
+        IN_PATH: ${{ inputs.path }}
+        IN_FORMAT: ${{ inputs.format }}
+        IN_OUTPUT: ${{ inputs.output }}
+        IN_FAIL_ON: ${{ inputs.fail-on }}
+        IN_RECURSIVE: ${{ inputs.recursive }}
+        IN_BASELINE: ${{ inputs.baseline }}
+        IN_SUMMARY: ${{ inputs.summary }}
+        IN_ARGS: ${{ inputs.args }}
+      run: |
+        set -uo pipefail
+        export PATH="$HOME/.pub-cache/bin:$PATH"
+
+        common=(--path "$IN_PATH" --fail-on "$IN_FAIL_ON" --no-color)
+        [ "$IN_RECURSIVE" = "true" ] && common+=(--recursive)
+        [ -n "$IN_BASELINE" ] && common+=(--baseline "$IN_BASELINE")
+        if [ -n "$IN_ARGS" ]; then
+          read -r -a extra <<< "$IN_ARGS"
+          common+=("${extra[@]}")
+        fi
+
+        # 1) The report the user asked for.
+        main=("${common[@]}" --format "$IN_FORMAT")
+        if [ -n "$IN_OUTPUT" ]; then
+          main+=(--output "$IN_OUTPUT")
+          echo "report-path=$IN_OUTPUT" >> "$GITHUB_OUTPUT"
+        fi
+        pub_health "${main[@]}"
+        code=$?
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+
+        # 2) Machine-readable score for the step outputs. Responses are
+        #    served from pub_health's on-disk cache, so this adds no requests.
+        json="${RUNNER_TEMP:-/tmp}/pub_health_score.json"
+        rm -f "$json"  # never report a score left over from an earlier run
+        pub_health "${common[@]}" --format json --output "$json" >/dev/null 2>&1 || true
+        if [ -s "$json" ]; then
+          # Top-level keys are indented by exactly two spaces; no jq needed.
+          score=$(sed -n 's/^  "score": \([0-9][0-9]*\),\{0,1\}$/\1/p' "$json" | head -n1)
+          risk=$(sed -n 's/^  "riskLevel": "\([a-z]*\)",\{0,1\}$/\1/p' "$json" | head -n1)
+          [ -n "$score" ] && echo "score=$score" >> "$GITHUB_OUTPUT"
+          [ -n "$risk" ] && echo "risk-level=$risk" >> "$GITHUB_OUTPUT"
+        fi
+
+        # 3) Job summary.
+        if [ "$IN_SUMMARY" = "true" ] && [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+          pub_health "${common[@]}" --format markdown >> "$GITHUB_STEP_SUMMARY" 2>/dev/null || true
+        fi
+
+        exit 0
+
+    - name: Apply failure policy
+      shell: bash
+      env:
+        EXIT_CODE: ${{ steps.analyze.outputs.exit-code }}
+        FAIL_ON_FINDINGS: ${{ inputs.fail-on-findings }}
+      run: |
+        # 1 = findings at/above the threshold; 2+ = real errors.
+        if [ "${EXIT_CODE:-0}" = "0" ]; then exit 0; fi
+        if [ "${EXIT_CODE}" = "1" ] && [ "$FAIL_ON_FINDINGS" = "false" ]; then
+          echo "pub_health found issues, but fail-on-findings is false."
+          exit 0
+        fi
+        echo "::error::pub_health exited with code ${EXIT_CODE}"
+        exit "${EXIT_CODE}"
