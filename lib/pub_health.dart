@@ -6,10 +6,15 @@ library;
 
 export 'src/models/dependency.dart';
 export 'src/models/dependency_kind.dart';
+export 'src/models/dependency_override.dart';
 export 'src/models/dependency_report.dart';
 export 'src/models/health_finding.dart';
 export 'src/models/health_score.dart';
+export 'src/models/ignore_rule.dart';
 export 'src/models/pub_dev_package_info.dart';
 export 'src/models/pub_health_options.dart';
 export 'src/models/severity.dart';
 export 'src/analyzers/project_analyzer.dart' show analyzeProject;
+export 'src/analyzers/project_analyzer.dart'
+    show ProjectAnalysisException, ProjectAnalyzer, createReporter;
+export 'src/version.dart' show pubHealthVersion;

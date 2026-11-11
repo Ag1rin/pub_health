@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/Ag1rin/pub_health/main/doc/pub_health.schema.json",
+  "title": "pub_health configuration",
+  "description": "Schema for pub_health.yaml. Add `# yaml-language-server: $schema=<this file's URL>` to the top of your config for editor completion and validation.",
+  "type": "object",
+  "additionalProperties": false,
+  "definitions": {
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "ruleId": {
+      "type": "string",
+      "enum": [
+        "outdated_dependency",
+        "discontinued_package",
+        "retracted_version",
+        "stale_package",
+        "sdk_constraint_risk",
+        "low_package_score",
+        "unused_dependency",
+        "dependency_override",
+        "git_dependency",
+        "unconstrained_dependency",
+        "misplaced_dependency",
+        "license_risk",
+        "platform_support",
+        "unverified_publisher"
+      ]
+    },
+    "stringList": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    }
+  },
+  "properties": {
+    "fail-on": {
+      "description": "Minimum severity that makes the command exit with code 1.",
+      "$ref": "#/definitions/severity",
+      "default": "high"
+    },
+    "stale-after-months": {
+      "description": "Months without a release before a package is reported as stale.",
+      "type": "integer",
+      "minimum": 1,
+      "default": 18
+    },
+    "include-transitive": {
+      "description": "Analyze transitive dependencies from pubspec.lock.",
+      "type": "boolean",
+      "default": true
+    },
+    "exclude": {
+      "description": "Package names that are never reported.",
+      "$ref": "#/definitions/stringList"
+    },
+    "disable-rules": {
+      "description": "Rule IDs that do not run.",
+      "type": "array",
+      "items": { "$ref": "#/definitions/ruleId" },
+      "uniqueItems": true
+    },
+    "disabled-rules": {
+      "description": "Alias of disable-rules.",
+      "type": "array",
+      "items": { "$ref": "#/definitions/ruleId" },
+      "uniqueItems": true
+    },
+    "report": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["console", "json", "markdown", "sarif", "html", "junit", "badge"]
+        },
+        "output": {
+          "description": "File to write the report to instead of stdout.",
+          "type": "string"
+        }
+      }
+    },
+    "timeout": {
+      "description": "Network timeout in seconds.",
+      "type": "integer",
+      "minimum": 1,
+      "default": 20
+    },
+    "ignore": {
+      "description": "Suppress known findings. Each entry is a package name or a map.",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["package"],
+            "properties": {
+              "package": {
+                "description": "Package name, or * for every package.",
+                "type": "string"
+              },
+              "rule": { "$ref": "#/definitions/ruleId" },
+              "reason": { "type": "string" },
+              "expires": {
+                "description": "Last day (YYYY-MM-DD, UTC) the ignore applies. Quote the value (\"2027-06-30\") so every YAML tool reads it as a string.",
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "severity": {
+      "description": "Override the severity of a rule.",
+      "type": "object",
+      "propertyNames": { "$ref": "#/definitions/ruleId" },
+      "additionalProperties": { "$ref": "#/definitions/severity" }
+    },
+    "baseline": {
+      "description": "Baseline file (relative to the project). Findings recorded in it are suppressed.",
+      "type": "string"
+    },
+    "licenses": {
+      "description": "License policy using lowercase SPDX ids as shown on pub.dev.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "allow": { "$ref": "#/definitions/stringList" },
+        "deny": { "$ref": "#/definitions/stringList" }
+      }
+    },
+    "platforms": {
+      "description": "Platforms direct dependencies must support.",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["android", "ios", "web", "linux", "macos", "windows"]
+      },
+      "uniqueItems": true
+    },
+    "wasm": {
+      "description": "Require direct dependencies to be WebAssembly-ready.",
+      "type": "boolean",
+      "default": false
+    },
+    "cache": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "dir": { "type": "string" },
+        "ttl-hours": { "type": "integer", "minimum": 1, "default": 6 }
+      }
+    },
+    "offline": {
+      "description": "Never use the network; rely on the on-disk cache only.",
+      "type": "boolean",
+      "default": false
+    },
+    "recursive": {
+      "description": "Analyze every Dart project below the target path.",
+      "type": "boolean",
+      "default": false
+    },
+    "pub-url": {
+      "description": "pub server API base URL, e.g. a mirror such as https://pub.flutter-io.cn. Defaults to $PUB_HOSTED_URL or https://pub.dev.",
+      "type": "string",
+      "format": "uri"
+    },
+    "exclude-projects": {
+      "description": "Project directories (relative, '/'-separated) skipped in recursive mode.",
+      "$ref": "#/definitions/stringList"
+    }
+  }
+}
